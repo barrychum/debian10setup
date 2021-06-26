@@ -15,7 +15,8 @@ if grep -R "## Change log ## " /etc/network/interfaces
 then
   echo "found"
 else
-  sed -i -e "\$a## Change log ##" /etc/network/interfaces
+  cat /etc/network/interfaces | sed -e "\a^|^^|^## Change log ##" | tr '^|^' '\n' > /etc/network/interfaces
+  # sed -i -e "\$a## Change log ##" /etc/network/interfaces
 fi
 sed -i -e "/## Change log ##/ a # changed network settings" /etc/network/interfaces
 
