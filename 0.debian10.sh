@@ -11,18 +11,21 @@ add_change_log_label() {
         cat /etc/network/interfaces | sed -e "\$a|## Change log ##" | tr '|##' '\n##' > /tmp/outfile.tmp
         mv /tmp/outfile.tmp $1
     fi
-
 }
-################# edit network interfaces
-sed -i -e "/iface $if inet dhcp/ a dns-nameservers 192.168.38.1" /etc/network/interfaces
-sed -i -e "/iface $if inet dhcp/ a dns-domain home.arpa" /etc/network/interfaces
-sed -i -e "/iface $if inet dhcp/ a gateway 192.168.38.1" /etc/network/interfaces
-sed -i -e "/iface $if inet dhcp/ a network 255.255.255.0" /etc/network/interfaces
-sed -i -e "/iface $if inet dhcp/ a address $ip" /etc/network/interfaces
-sed -i -e "s/iface $if inet dhcp/iface $if inet static/g" /etc/network/interfaces
 
-add_change_log_label /etc/network/interfaces
-sed -i -e "/## Change log ##/ a # $timestamp changed interface" /etc/network/interfaces
+################# edit network interfaces
+$file=/etc/network/interfaces
+if [ -z "$(grep -R 'changed interface' $file)"]
+then
+    sed -i -e "/iface $if inet dhcp/ a dns-nameservers 192.168.38.1" $file
+    sed -i -e "/iface $if inet dhcp/ a dns-domain home.arpa" $file
+    sed -i -e "/iface $if inet dhcp/ a gateway 192.168.38.1" $file
+    sed -i -e "/iface $if inet dhcp/ a network 255.255.255.0" $file
+    sed -i -e "/iface $if inet dhcp/ a address $ip" $file
+    sed -i -e "s/iface $if inet dhcp/iface $if inet static/g" $file
+fi
+add_change_log_label $file
+sed -i -e "/## Change log ##/ a # $timestamp changed interface" $file
 
 ##################### disable ipv6
 # if grep -Fxq "ipv6" /etc/sysctl.conf
