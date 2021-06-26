@@ -17,7 +17,7 @@ then
 else
   sed -i -e "\$a## Change log ##" /etc/network/interfaces
 fi
-sed -i -e "/## Change log ##/ a changed network settings" /etc/network/interfaces
+sed -i -e "/## Change log ##/ a # changed network settings" /etc/network/interfaces
 
 ##################### disable ipv6
 # if grep -Fxq "ipv6" /etc/sysctl.conf
@@ -38,7 +38,7 @@ then
 else
   sed -i -e "\$a## Change log ##" /etc/sysctl.conf
 fi
-sed -i -e "/## Change log ##/ a disabled ipv6" /etc/sysctl.conf
+sed -i -e "/## Change log ##/ a # disabled ipv6" /etc/sysctl.conf
 
 ###################### enable remote ssh
 if grep -R "#PermitRootLoginChangedManually" /etc/ssh/sshd_config
@@ -55,7 +55,7 @@ then
 else
   sed -i -e "\$a## Change log ##" /etc/ssh/sshd_config
 fi
-sed -i -e "/## Change log ##/ a changed ssh" /etc/ssh/sshd_config
+sed -i -e "/## Change log ##/ a # changed ssh" /etc/ssh/sshd_config
 
 # sed -i -e "/#PermitRootLogin/ a PermitRootLogin yes" /etc/ssh/sshd_config
 
