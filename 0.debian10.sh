@@ -9,8 +9,7 @@ add_change_log_label() {
     if [ -z "$(grep -R '## Change log ##' $1)" ]
     then
         cat /etc/network/interfaces | sed -e "\$a|## Change log ##" | tr '|##' '\n##' > /tmp/outfile.tmp
-        sed -i -e "\$a# $timestamp changed interface" /tmp/outfile.tmp
-#        mv /tmp/outfile.tmp $1
+        mv /tmp/outfile.tmp $1
     fi
 
 }
@@ -23,7 +22,7 @@ sed -i -e "/iface $if inet dhcp/ a address $ip" /etc/network/interfaces
 sed -i -e "s/iface $if inet dhcp/iface $if inet static/g" /etc/network/interfaces
 
 add_change_log_label /etc/network/interfaces
-sed -i -e "\$a# $timestamp changed interface" /tmp/outfile.tmp
+sed -i -e "/## Change log ##/ a # $timestamp changed interface" /etc/network/interfaces
 
 ##################### disable ipv6
 # if grep -Fxq "ipv6" /etc/sysctl.conf
