@@ -23,3 +23,7 @@ else
 fi
 
 # sed -i -e "/#PermitRootLogin/ a PermitRootLogin yes" /etc/ssh/sshd_config
+
+ifdown $if &&  ifup $if
+systemctl restart sshd
+
