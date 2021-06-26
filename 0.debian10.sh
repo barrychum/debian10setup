@@ -15,8 +15,8 @@ add_change_log_label() {
 ################# edit network interfaces
 file=/etc/network/interfaces
 s=($(ip r | grep onlink))
-if=${s[4]}
-echo "Plese enter $if"
+ifa=${s[4]}
+echo "Interface name $ifa"
 read if
 
 if [ -z "$(grep -R '*changed interface*' $file)"]
