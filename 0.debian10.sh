@@ -5,7 +5,7 @@ timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
 add_change_log_label() {
     if [ -z "$(grep -R '## Change log ##' $1)" ]
     then
-        cat /etc/network/interfaces | sed -e "\$a|## Change log ##" | tr '|##' '\n##' > /tmp/outfile.tmp
+        cat $1 | sed -e "\$a|## Change log ##" | tr '|##' '\n##' > /tmp/outfile.tmp
         mv /tmp/outfile.tmp $1
     fi
 }
