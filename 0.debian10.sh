@@ -2,8 +2,18 @@
 echo "Please enter new IP"
 read ip
 export if=ens192
+
 export timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
 
+add_change_log_label() {
+    if [ -z "$(grep -R '## Change log ##' $1)" ]
+    then
+        cat /etc/network/interfaces | sed -e "\$a|## Change log ##" | tr '|##' '\n##' > /tmp/outfile.tmp
+        sed -i -e "\$a# $timestamp changed interface" /tmp/outfile.tmp
+#        mv /tmp/outfile.tmp $1
+    fi
+
+}
 ################# edit network interfaces
 sed -i -e "/iface $if inet dhcp/ a dns-nameservers 192.168.38.1" /etc/network/interfaces
 sed -i -e "/iface $if inet dhcp/ a dns-domain home.arpa" /etc/network/interfaces
@@ -12,22 +22,13 @@ sed -i -e "/iface $if inet dhcp/ a network 255.255.255.0" /etc/network/interface
 sed -i -e "/iface $if inet dhcp/ a address $ip" /etc/network/interfaces
 sed -i -e "s/iface $if inet dhcp/iface $if inet static/g" /etc/network/interfaces
 
-if grep -R "## Change log ## " /etc/network/interfaces
-then
-  echo "found"
-else
-  cat /etc/network/interfaces | sed -e "\$a|## Change log ##" | tr '|##' '\n##' > /etc/network/interfaces.new
-  sed -e "\$a# $timestamp changed interface" /etc/network/interfaces.new
-  # sed -i -e "\$a## Change log ##" /etc/network/interfaces
-fi
-sed -i -e "/## Change log ##/ a # changed network settings" /etc/network/interfaces
+add_change_log_label /etc/network/interfaces
+sed -i -e "\$a# $timestamp changed interface" /tmp/outfile.tmp
 
 ##################### disable ipv6
 # if grep -Fxq "ipv6" /etc/sysctl.conf
-if grep -R "#ipv6disabled" /etc/sysctl.conf
+if [ -z "$(grep -R '#ipv6disabled' /etc/sysctl.conf)" ]
 then
-  echo "found"
-else
   sed -i -e "\$anet.ipv6.conf.$if.disable_ipv6=1" /etc/sysctl.conf
   sed -i -e "\$anet.ipv6.conf.lo.disable_ipv6=1" /etc/sysctl.conf
   sed -i -e "\$anet.ipv6.conf.default.disable_ipv6=1" /etc/sysctl.conf
@@ -35,30 +36,16 @@ else
   sed -i -e "\$a#ipv6disabled" /etc/sysctl.conf
 fi
 
-if grep -R "## Change log ## " /etc/sysctl.conf
-then
-  echo "found"
-else
-  sed -i -e "\$a## Change log ##" /etc/sysctl.conf
-fi
-sed -i -e "/## Change log ##/ a # disabled ipv6" /etc/sysctl.conf
+# sed -i -e "/## Change log ##/ a # disabled ipv6" /etc/sysctl.conf
 
 ###################### enable remote ssh
-if grep -R "#PermitRootLoginChangedManually" /etc/ssh/sshd_config
+if [ -z "$(grep -R '#PermitRootLoginChangedManually' /etc/ssh/sshd_config)" ]
 then
-  echo "found"
-else
   sed -i -e "/#PermitRootLogin/ a PermitRootLogin yes" /etc/ssh/sshd_config
   sed -i -e "\$a#PermitRootLoginChangedManually" /etc/ssh/sshd_config
 fi
 
-if grep -R "## Change log ## " /etc/ssh/sshd_config
-then
-  echo "found"
-else
-  sed -i -e "\$a## Change log ##" /etc/ssh/sshd_config
-fi
-sed -i -e "/## Change log ##/ a # changed ssh" /etc/ssh/sshd_config
+# sed -i -e "/## Change log ##/ a # changed ssh" /etc/ssh/sshd_config
 
 # sed -i -e "/#PermitRootLogin/ a PermitRootLogin yes" /etc/ssh/sshd_config
 
