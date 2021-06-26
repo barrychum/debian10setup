@@ -19,7 +19,7 @@ ifa=${s[4]}
 echo "Interface name $ifa"
 read if
 
-if [ -z "$(grep -R '*changed interface*' $file)"]
+if [ -z "$(grep -R '*changed interface*' $file)" ]
 then
     # https://stackoverflow.com/questions/7815989/need-to-break-ip-address-stored-in-bash-variable-into-octets
     echo "Please enter new IP"
