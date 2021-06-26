@@ -16,11 +16,10 @@ add_change_log_label() {
 file=/etc/network/interfaces
 s=($(ip r | grep default))
 ifa=${s[4]}
-echo "Interface name $ifa"
+echo "Enter interface name $ifa"
 read if
 
-tempstr=*changed $if*
-if [ -z "$(grep -R $tempstr $file)" ]
+if [ -z "$(grep -R 'changed interface' $file)" ]
 then
     # https://stackoverflow.com/questions/7815989/need-to-break-ip-address-stored-in-bash-variable-into-octets
     echo "Please enter new IP"
@@ -41,7 +40,7 @@ then
     ifup $if
 
     add_change_log_label $file
-    sed -i -e "/## Change log ##/ a # $timestamp *changed $if*" $file
+    sed -i -e "/## Change log ##/ a # $timestamp *changed interface*" $file
 fi
 
 ##################### disable ipv6
