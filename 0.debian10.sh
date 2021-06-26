@@ -2,6 +2,7 @@
 echo "Please enter new IP"
 read ip
 export if=ens192
+export timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
 
 ################# edit network interfaces
 sed -i -e "/iface $if inet dhcp/ a dns-nameservers 192.168.38.1" /etc/network/interfaces
@@ -15,7 +16,8 @@ if grep -R "## Change log ## " /etc/network/interfaces
 then
   echo "found"
 else
-  cat /etc/network/interfaces | sed -e "\$a||## Change log ##" | tr '|' '\n' > /etc/network/interfaces.new
+  cat /etc/network/interfaces | sed -e "\$a|## Change log ##" | tr '|##' '\n##' > /etc/network/interfaces.new
+  sed -e "\$a# $timestamp changed interface" /etc/network/interfaces.new
   # sed -i -e "\$a## Change log ##" /etc/network/interfaces
 fi
 sed -i -e "/## Change log ##/ a # changed network settings" /etc/network/interfaces
