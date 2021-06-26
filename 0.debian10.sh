@@ -14,6 +14,11 @@ add_change_log_label() {
 
 ################# edit network interfaces
 file=/etc/network/interfaces
+s=($(ip r | grep onlink))
+if=${s[4]}
+echo "Plese enter $if"
+read if
+
 if [ -z "$(grep -R '*changed interface*' $file)"]
 then
     # https://stackoverflow.com/questions/7815989/need-to-break-ip-address-stored-in-bash-variable-into-octets
@@ -21,7 +26,7 @@ then
     read ip
 
     IFS=. read ip1 ip2 ip3 ip4 <<< "$ip"
-    if=ens192
+    # if=ens192
 
     sed -i -e "/iface $if inet dhcp/ a dns-nameservers $ip1.$ip2.$ip3.1" $file
     sed -i -e "/iface $if inet dhcp/ a dns-domain home.arpa" $file
@@ -31,7 +36,7 @@ then
     sed -i -e "s/iface $if inet dhcp/iface $if inet static/g" $file
 fi
 add_change_log_label $file
-sed -i -e "/## Change log ##/ a # $timestamp *changed interface*" $file
+sed -i -e "/## Change log ##/ a # $timestamp *changed $if*" $file
 
 ##################### disable ipv6
 # if grep -Fxq "ipv6" /etc/sysctl.conf
@@ -57,6 +62,7 @@ add_change_log_label $file3
 sed -i -e "/## Change log ##/ a # $timestamp *PermitRootLoginChanged*" $file3
 
 ip addr flush $if && systemctl restart networking
-ifdown $if &&  ifup $if
+# ifdown $if &&  ifup $if
+ifup $if
 systemctl restart sshd
 
