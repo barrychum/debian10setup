@@ -14,7 +14,7 @@ add_change_log_label() {
 
 ################# edit network interfaces
 file=/etc/network/interfaces
-s=($(ip r | grep onlink))
+s=($(ip r | grep default))
 ifa=${s[4]}
 echo "Interface name $ifa"
 read if
@@ -35,9 +35,14 @@ then
     sed -i -e "/iface $if inet dhcp/ a network 255.255.255.0" $file
     sed -i -e "/iface $if inet dhcp/ a address $ip" $file
     sed -i -e "s/iface $if inet dhcp/iface $if inet static/g" $file
+
+    ip addr flush $if && systemctl restart networking
+    # ifdown $if &&  ifup $if
+    ifup $if
+
+    add_change_log_label $file
+    sed -i -e "/## Change log ##/ a # $timestamp *changed $if*" $file
 fi
-add_change_log_label $file
-sed -i -e "/## Change log ##/ a # $timestamp *changed $if*" $file
 
 ##################### disable ipv6
 # if grep -Fxq "ipv6" /etc/sysctl.conf
@@ -49,21 +54,22 @@ then
   sed -i -e "\$anet.ipv6.conf.default.disable_ipv6=1" $file2
   sed -i -e "\$anet.ipv6.conf.all.disable_ipv6=1" $file2
   sed -i -e "\$a#ipv6disabled" $file2
+
+  sysctl -p
+
+  add_change_log_label $file2
+  sed -i -e "/## Change log ##/ a # $timestamp *ipv6disabled*" $file2
 fi
-add_change_log_label $file2
-sed -i -e "/## Change log ##/ a # $timestamp *ipv6disabled*" $file2
 
 ###################### enable remote ssh
 file3=/etc/ssh/sshd_config
 if [ -z "$(grep -R '*PermitRootLoginChanged*' $file3)" ]
 then
   sed -i -e "/#PermitRootLogin/ a PermitRootLogin yes" $file3
-fi
-add_change_log_label $file3
-sed -i -e "/## Change log ##/ a # $timestamp *PermitRootLoginChanged*" $file3
 
-ip addr flush $if && systemctl restart networking
-# ifdown $if &&  ifup $if
-ifup $if
-systemctl restart sshd
+  add_change_log_label $file3
+  sed -i -e "/## Change log ##/ a # $timestamp *PermitRootLoginChanged*" $file3
+
+  systemctl restart sshd
+fi
 
