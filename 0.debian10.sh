@@ -31,7 +31,7 @@ then
     sed -i -e "/iface $if inet dhcp/ a dns-nameservers $ip1.$ip2.$ip3.1" $file
     sed -i -e "/iface $if inet dhcp/ a dns-domain home.arpa" $file
     sed -i -e "/iface $if inet dhcp/ a gateway $ip1.$ip2.$ip3.1" $file
-    sed -i -e "/iface $if inet dhcp/ a network 255.255.255.0" $file
+    sed -i -e "/iface $if inet dhcp/ a netmask 255.255.255.0" $file
     sed -i -e "/iface $if inet dhcp/ a address $ip" $file
     sed -i -e "s/iface $if inet dhcp/iface $if inet static/g" $file
 
