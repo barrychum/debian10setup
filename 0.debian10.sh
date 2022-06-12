@@ -47,8 +47,8 @@ fi
 echo "Setting interface $ifname"
 
 t=($(ip r | grep $ifname | grep src))
-b=echo ${t[0]} | awk '{split($0,a,"/");print a[2]}'
-echo $b
+b=($(echo ${t[0]} | awk '{split($0,a,"/");print a[2]}'))
+c=($(cdr2mask $b))
 
 if [ -z "$(grep -R 'changed interface' $file)" ]
 then
@@ -66,7 +66,7 @@ then
     # sed -i -e "/iface $ifname inet dhcp/ a netmask 255.255.255.0" $file
 
     sed -i -e "/iface $ifname inet dhcp/ a gateway $defaultroute" $file
-    sed -i -e "/iface $ifname inet dhcp/ a netmask 255.255.255.0" $file
+    sed -i -e "/iface $ifname inet dhcp/ a netmask $c" $file
     sed -i -e "/iface $ifname inet dhcp/ a address $ip" $file
     sed -i -e "s/iface $ifname inet dhcp/iface $ifname inet static/g" $file
 
