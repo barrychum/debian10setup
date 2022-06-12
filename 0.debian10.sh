@@ -12,10 +12,31 @@ add_change_log_label() {
     fi
 }
 
+mask2cdr ()
+{
+   # Assumes there's no "255." after a non-255 byte in the mask
+   local x=${1##*255.}
+   set -- 0^^^128^192^224^240^248^252^254^ $(( (${#1} - ${#x})*2 )) ${x%%.*}
+   x=${1%%$3*}
+   echo $(( $2 + (${#x}/4) ))
+}
+
+
+cdr2mask ()
+{
+   # Number of args to shift, 255..255, first non-255 byte, zeroes
+   set -- $(( 5 - ($1 / 8) )) 255 255 255 255 $(( (255 << (8 - ($1 % 8))) & 255 )) 0 0 0
+   [ $1 -gt 1 ] && shift $1 || shift
+   echo ${1-0}.${2-0}.${3-0}.${4-0}
+}
+
+
 ################# edit network interfaces
 file=/etc/network/interfaces
 s=($(ip r | grep default))
 ifa=${s[4]}
+defaultroute=${s[2]}
+
 echo "Enter interface name to modify, or press enter to set default \"$ifa\""
 read ifname
 
@@ -24,6 +45,10 @@ then
     ifname=$ifa
 fi
 echo "Setting interface $ifname"
+
+t=($(ip r | grep $ifname | grep src))
+b=echo ${t[0]} | awk '{split($0,a,"/");print a[2]}'
+echo $b
 
 if [ -z "$(grep -R 'changed interface' $file)" ]
 then
@@ -34,9 +59,13 @@ then
     IFS=. read ip1 ip2 ip3 ip4 <<< "$ip"
     # if=ens192
 
-    sed -i -e "/iface $ifname inet dhcp/ a dns-nameservers $ip1.$ip2.$ip3.1" $file
-    sed -i -e "/iface $ifname inet dhcp/ a dns-domain home.arpa" $file
-    sed -i -e "/iface $ifname inet dhcp/ a gateway $ip1.$ip2.$ip3.1" $file
+    # dns server is configured in /etc/resolv.conf
+    # sed -i -e "/iface $ifname inet dhcp/ a dns-nameservers $ip1.$ip2.$ip3.1" $file
+    # sed -i -e "/iface $ifname inet dhcp/ a dns-domain home.arpa" $file
+    # sed -i -e "/iface $ifname inet dhcp/ a gateway $ip1.$ip2.$ip3.1" $file
+    # sed -i -e "/iface $ifname inet dhcp/ a netmask 255.255.255.0" $file
+
+    sed -i -e "/iface $ifname inet dhcp/ a gateway $defaultroute" $file
     sed -i -e "/iface $ifname inet dhcp/ a netmask 255.255.255.0" $file
     sed -i -e "/iface $ifname inet dhcp/ a address $ip" $file
     sed -i -e "s/iface $ifname inet dhcp/iface $ifname inet static/g" $file
