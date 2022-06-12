@@ -16,12 +16,12 @@ add_change_log_label() {
 file=/etc/network/interfaces
 s=($(ip r | grep default))
 ifa=${s[4]}
-echo "Enter interface name to modify or press enter to set default \"$ifa\""
+echo "Enter interface name to modify, or press enter to set default \"$ifa\""
 read ifname
 
 if [ -z "$ifname"]
 then
-    ifname = $ifa
+    ifname=$ifa
 fi
 echo "Setting interface $ifname"
 
