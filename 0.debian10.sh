@@ -17,7 +17,7 @@ file=/etc/network/interfaces
 s=($(ip r | grep default))
 ifa=${s[4]}
 echo "Enter interface name $ifa"
-read if
+read ifname
 
 if [ -z "$(grep -R 'changed interface' $file)" ]
 then
@@ -28,16 +28,16 @@ then
     IFS=. read ip1 ip2 ip3 ip4 <<< "$ip"
     # if=ens192
 
-    sed -i -e "/iface $if inet dhcp/ a dns-nameservers $ip1.$ip2.$ip3.1" $file
-    sed -i -e "/iface $if inet dhcp/ a dns-domain home.arpa" $file
-    sed -i -e "/iface $if inet dhcp/ a gateway $ip1.$ip2.$ip3.1" $file
-    sed -i -e "/iface $if inet dhcp/ a netmask 255.255.255.0" $file
-    sed -i -e "/iface $if inet dhcp/ a address $ip" $file
-    sed -i -e "s/iface $if inet dhcp/iface $if inet static/g" $file
+    sed -i -e "/iface $ifname inet dhcp/ a dns-nameservers $ip1.$ip2.$ip3.1" $file
+    sed -i -e "/iface $ifname inet dhcp/ a dns-domain home.arpa" $file
+    sed -i -e "/iface $ifname inet dhcp/ a gateway $ip1.$ip2.$ip3.1" $file
+    sed -i -e "/iface $ifname inet dhcp/ a netmask 255.255.255.0" $file
+    sed -i -e "/iface $ifname inet dhcp/ a address $ip" $file
+    sed -i -e "s/iface $ifname inet dhcp/iface $ifname inet static/g" $file
 
-    ip addr flush $if && systemctl restart networking
-    # ifdown $if &&  ifup $if
-    ifup $if
+    ip addr flush $ifname && systemctl restart networking
+    # ifdown $ifname &&  ifup $ifname
+    ifup $ifname
 
     add_change_log_label $file
     sed -i -e "/## Change log ##/ a # $timestamp *changed interface*" $file
@@ -48,7 +48,7 @@ fi
 file2=/etc/sysctl.conf
 if [ -z "$(grep -R '*ipv6disabled*' $file2)" ]
 then
-  sed -i -e "\$anet.ipv6.conf.$if.disable_ipv6=1" $file2
+  sed -i -e "\$anet.ipv6.conf.$ifname.disable_ipv6=1" $file2
   sed -i -e "\$anet.ipv6.conf.lo.disable_ipv6=1" $file2
   sed -i -e "\$anet.ipv6.conf.default.disable_ipv6=1" $file2
   sed -i -e "\$anet.ipv6.conf.all.disable_ipv6=1" $file2
